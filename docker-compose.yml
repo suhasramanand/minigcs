@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  minigcs-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config.yaml:/app/config.yaml
+      - ./data:/app/data
+      - ./metrics.csv:/app/metrics.csv
+    environment:
+      - PYTHONPATH=/app
+    command: python -m api.server
+    depends_on:
+      - node-1
+      - node-2
+      - node-3
+
+  node-1:
+    build: .
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./data/node-1:/app/data/node-1
+      - ./config.yaml:/app/config.yaml
+    environment:
+      - PYTHONPATH=/app
+      - NODE_ID=node-1
+    command: python -c "
+      import asyncio
+      import logging
+      from core.storage_node import StorageNode
+      
+      async def run_node():
+          logging.basicConfig(level=logging.INFO)
+          node = StorageNode('node-1', 'us-east-1', './data/node-1')
+          await node.health_check()
+          print('Node-1 is running and healthy')
+          # Keep the container running
+          await asyncio.sleep(3600)
+      
+      asyncio.run(run_node())
+    "
+
+  node-2:
+    build: .
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./data/node-2:/app/data/node-2
+      - ./config.yaml:/app/config.yaml
+    environment:
+      - PYTHONPATH=/app
+      - NODE_ID=node-2
+    command: python -c "
+      import asyncio
+      import logging
+      from core.storage_node import StorageNode
+      
+      async def run_node():
+          logging.basicConfig(level=logging.INFO)
+          node = StorageNode('node-2', 'us-west-1', './data/node-2')
+          await node.health_check()
+          print('Node-2 is running and healthy')
+          await asyncio.sleep(3600)
+      
+      asyncio.run(run_node())
+    "
+
+  node-3:
+    build: .
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./data/node-3:/app/data/node-3
+      - ./config.yaml:/app/config.yaml
+    environment:
+      - PYTHONPATH=/app
+      - NODE_ID=node-3
+    command: python -c "
+      import asyncio
+      import logging
+      from core.storage_node import StorageNode
+      
+      async def run_node():
+          logging.basicConfig(level=logging.INFO)
+          node = StorageNode('node-3', 'eu-west-1', './data/node-3')
+          await node.health_check()
+          print('Node-3 is running and healthy')
+          await asyncio.sleep(3600)
+      
+      asyncio.run(run_node())
+    "
+
+volumes:
+  data:
+    driver: local

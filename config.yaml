@@ -1,0 +1,44 @@
+# MiniGCS Configuration
+nodes:
+  - id: "node-1"
+    region: "us-east-1"
+    host: "localhost"
+    port: 8001
+    storage_path: "./data/node-1"
+  - id: "node-2"
+    region: "us-west-1"
+    host: "localhost"
+    port: 8002
+    storage_path: "./data/node-2"
+  - id: "node-3"
+    region: "eu-west-1"
+    host: "localhost"
+    port: 8003
+    storage_path: "./data/node-3"
+
+# Erasure coding parameters
+erasure_coding:
+  k: 2  # data shards
+  m: 1  # parity shards
+  block_size: 1024  # bytes per shard
+
+# Replication settings
+replication:
+  factor: 3
+  regions: ["us-east-1", "us-west-1", "eu-west-1"]
+
+# API settings
+api:
+  host: "localhost"
+  port: 8000
+  max_file_size: 104857600  # 100MB
+
+# Metrics
+metrics:
+  enabled: true
+  output_file: "metrics.csv"
+  
+# Recovery settings
+recovery:
+  timeout: 30  # seconds
+  retry_attempts: 3
